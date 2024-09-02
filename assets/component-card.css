@@ -301,8 +301,11 @@
 }
 
 .card__heading {
+  font-size: var(--font-body-scale);
+  font-weight: 600;
   margin-top: 0;
   margin-bottom: 0;
+  text-transform: capitalize;
 }
 
 .card__heading:last-child {

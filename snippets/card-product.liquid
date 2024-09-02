@@ -2,7 +2,7 @@
   Renders a product card
 
   Accepts:
-  - card_product: {Object} Product Liquid object (optional)
+  - variant: {Object} Product Liquid object (optional)
   - media_aspect_ratio: {String} Size of the product image card. Values are "square" and "portrait". Default is "square" (optional)
   - image_shape: {String} Image mask to apply to the product image card. Values are "arch", "blob", "chevronleft", "chevronright", "diamond", "parallelogram", and "round". (optional)
   - show_secondary_image: {Boolean} Show the secondary image on hover. Default: false (optional)
@@ -28,13 +28,13 @@
   {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
   {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
 {%- endunless -%}
-{%- if card_product and card_product != empty -%}
+{%- if variant and variant != empty -%}
   {%- liquid
     assign ratio = 1
-    if card_product.featured_media and media_aspect_ratio == 'portrait'
+    if variant.featured_media and media_aspect_ratio == 'portrait'
       assign ratio = 0.8
-    elsif card_product.featured_media and media_aspect_ratio == 'adapt'
-      assign ratio = card_product.featured_media.aspect_ratio
+    elsif variant.featured_media and media_aspect_ratio == 'adapt'
+      assign ratio = variant.featured_media.aspect_ratio
     endif
     if ratio == 0 or ratio == null
       assign ratio = 1
@@ -44,65 +44,65 @@
     <div
       class="
         card card--{{ settings.card_style }}
-        {% if card_product.featured_media %} card--media{% else %} card--text{% endif %}
+        {% if variant.featured_media %} card--media{% else %} card--text{% endif %}
         {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}
         {% if image_shape and image_shape != 'default' %} card--shape{% endif %}
         {% if extend_height %} card--extend-height{% endif %}
-        {% if card_product.featured_media == nil and settings.card_style == 'card' %} ratio{% endif %}
+        {% if variant.featured_media == nil and settings.card_style == 'card' %} ratio{% endif %}
         {% if horizontal_class %} card--horizontal{% endif %}
       "
-      style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+      style="--ratio-percent: 100%;"
     >
       <div
-        class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %}{% if card_product.featured_media or settings.card_style == 'standard' %} ratio{% endif %}"
-        style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+        class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %}{% if variant.featured_media or settings.card_style == 'standard' %} ratio{% endif %}"
+        style="--ratio-percent: 100%;"
       >
-        {%- if card_product.featured_media -%}
+        {%- if variant.featured_media -%}
           <div class="card__media{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
             <div class="media media--transparent media--hover-effect">
               {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
               <img
                 srcset="
-                  {%- if card_product.featured_media.width >= 165 -%}{{ card_product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
-                  {%- if card_product.featured_media.width >= 360 -%}{{ card_product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
-                  {%- if card_product.featured_media.width >= 533 -%}{{ card_product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
-                  {%- if card_product.featured_media.width >= 720 -%}{{ card_product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
-                  {%- if card_product.featured_media.width >= 940 -%}{{ card_product.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
-                  {%- if card_product.featured_media.width >= 1066 -%}{{ card_product.featured_media | image_url: width: 1066 }} 1066w,{%- endif -%}
-                  {{ card_product.featured_media | image_url }} {{ card_product.featured_media.width }}w
+                  {%- if first_image.width >= 165 -%}{{ first_image | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if first_image.width >= 360 -%}{{ first_image | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if first_image.width >= 533 -%}{{ first_image | image_url: width: 533 }} 533w,{%- endif -%}
+                  {%- if first_image.width >= 720 -%}{{ first_image | image_url: width: 720 }} 720w,{%- endif -%}
+                  {%- if first_image.width >= 940 -%}{{ first_image | image_url: width: 940 }} 940w,{%- endif -%}
+                  {%- if first_image.width >= 1066 -%}{{ first_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                  {{ first_image | image_url }} {{ first_image.width }}w
                 "
-                src="{{ card_product.featured_media | image_url: width: 533 }}"
+                src="{{ first_image | image_url: width: 533 }}"
                 sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                alt="{{ card_product.featured_media.alt | escape }}"
-                class="motion-reduce"
+                alt="{{ first_image.alt | escape }}"
+                class="motion-reduce primary-image"
                 {% unless lazy_load == false %}
                   loading="lazy"
                 {% endunless %}
-                width="{{ card_product.featured_media.width }}"
-                height="{{ card_product.featured_media.height }}"
+                width="{{ first_image.width }}"
+                height="{{ first_image.height }}"
               >
               {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
 
-              {%- if card_product.media[1] != null and show_secondary_image -%}
+              {% if second_image and show_secondary_image %}
                 <img
                   srcset="
-                    {%- if card_product.media[1].width >= 165 -%}{{ card_product.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 360 -%}{{ card_product.media[1] | image_url: width: 360 }} 360w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 533 -%}{{ card_product.media[1] | image_url: width: 533 }} 533w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 720 -%}{{ card_product.media[1] | image_url: width: 720 }} 720w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 940 -%}{{ card_product.media[1] | image_url: width: 940 }} 940w,{%- endif -%}
-                    {%- if card_product.media[1].width >= 1066 -%}{{ card_product.media[1] | image_url: width: 1066 }} 1066w,{%- endif -%}
-                    {{ card_product.media[1] | image_url }} {{ card_product.media[1].width }}w
+                    {%- if second_image.width >= 165 -%}{{ second_image | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if second_image.width >= 360 -%}{{ second_image | image_url: width: 360 }} 360w,{%- endif -%}
+                    {%- if second_image.width >= 533 -%}{{ second_image | image_url: width: 533 }} 533w,{%- endif -%}
+                    {%- if second_image.width >= 720 -%}{{ second_image | image_url: width: 720 }} 720w,{%- endif -%}
+                    {%- if second_image.width >= 940 -%}{{ second_image | image_url: width: 940 }} 940w,{%- endif -%}
+                    {%- if second_image.width >= 1066 -%}{{ second_image | image_url: width: 1066 }} 1066w,{%- endif -%}
+                    {{ second_image | image_url }} {{ second_image.width }}w
                   "
-                  src="{{ card_product.media[1] | image_url: width: 533 }}"
+                  src="{{ second_image | image_url: width: 533 }}"
                   sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                  alt=""
-                  class="motion-reduce"
+                  alt="{{ second_image.alt | escape }}"
+                  class="motion-reduce secondary-image"
                   loading="lazy"
-                  width="{{ card_product.media[1].width }}"
-                  height="{{ card_product.media[1].height }}"
+                  width="{{ second_image.width }}"
+                  height="{{ second_image.height }}"
                 >
-              {%- endif -%}
+              {% endif %}
             </div>
           </div>
         {%- endif -%}
@@ -110,31 +110,31 @@
           <div class="card__information">
             <h3
               class="card__heading"
-              {% if card_product.featured_media == null and settings.card_style == 'standard' %}
-                id="title-{{ section_id }}-{{ card_product.id }}"
+              {% if variant.featured_media == null and settings.card_style == 'standard' %}
+                id="title-{{ section_id }}-{{ variant.id }}"
               {% endif %}
             >
               <a
-                href="{{ card_product.url }}"
-                id="StandardCardNoMediaLink-{{ section_id }}-{{ card_product.id }}"
+                href="{{ variant.url }}"
+                id="StandardCardNoMediaLink-{{ section_id }}-{{ variant.id }}"
                 class="full-unstyled-link"
-                aria-labelledby="StandardCardNoMediaLink-{{ section_id }}-{{ card_product.id }} NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
+                aria-labelledby="StandardCardNoMediaLink-{{ section_id }}-{{ variant.id }} NoMediaStandardBadge-{{ section_id }}-{{ variant.id }}"
               >
-                {{ card_product.title | escape }}
+                {{ variant.title | escape }}
               </a>
             </h3>
           </div>
           <div class="card__badge {{ settings.badge_position }}">
-            {%- if card_product.available == false -%}
+            {%- if variant.available == false -%}
               <span
-                id="NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
+                id="NoMediaStandardBadge-{{ section_id }}-{{ variant.id }}"
                 class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}"
               >
                 {{- 'products.product.sold_out' | t -}}
               </span>
-            {%- elsif card_product.compare_at_price > card_product.price and card_product.available -%}
+            {%- elsif variant.compare_at_price > variant.price and variant.available -%}
               <span
-                id="NoMediaStandardBadge-{{ section_id }}-{{ card_product.id }}"
+                id="NoMediaStandardBadge-{{ section_id }}-{{ variant.id }}"
                 class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}"
               >
                 {{- 'products.product.on_sale' | t -}}
@@ -146,18 +146,18 @@
       <div class="card__content">
         <div class="card__information">
           <h3
-            class="card__heading{% if card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
-            {% if card_product.featured_media or settings.card_style == 'card' %}
-              id="title-{{ section_id }}-{{ card_product.id }}"
+            class="card__heading{% if variant.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
+            {% if variant.featured_media or settings.card_style == 'card' %}
+              id="title-{{ section_id }}-{{ variant.id }}"
             {% endif %}
           >
             <a
-              href="{{ card_product.url }}"
-              id="CardLink-{{ section_id }}-{{ card_product.id }}"
+              href="{{ variant.url }}"
+              id="CardLink-{{ section_id }}-{{ variant.id }}"
               class="full-unstyled-link"
-              aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }} Badge-{{ section_id }}-{{ card_product.id }}"
+              aria-labelledby="CardLink-{{ section_id }}-{{ variant.id }} Badge-{{ section_id }}-{{ variant.id }}"
             >
-              {{ card_product.title | escape }}
+              {{ card_product.title | escape }} - {{ variant.option1 | escape }}
             </a>
           </h3>
           <div class="card-information">
@@ -168,10 +168,10 @@
 
             <span class="caption-large light">{{ block.settings.description | escape }}</span>
 
-            {%- if show_rating and card_product.metafields.reviews.rating.value != blank -%}
+            {%- if show_rating and variant.metafields.reviews.rating.value != blank -%}
               {% liquid
                 assign rating_decimal = 0
-                assign decimal = card_product.metafields.reviews.rating.value.rating | modulo: 1
+                assign decimal = variant.metafields.reviews.rating.value.rating | modulo: 1
                 if decimal >= 0.3 and decimal <= 0.7
                   assign rating_decimal = 0.5
                 elsif decimal > 0.7
@@ -181,34 +181,34 @@
               <div
                 class="rating"
                 role="img"
-                aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: card_product.metafields.reviews.rating.value, rating_max: card_product.metafields.reviews.rating.value.scale_max }}"
+                aria-label="{{ 'accessibility.star_reviews_info' | t: rating_value: variant.metafields.reviews.rating.value, rating_max: variant.metafields.reviews.rating.value.scale_max }}"
               >
                 <span
                   aria-hidden="true"
                   class="rating-star"
-                  style="--rating: {{ card_product.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ card_product.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"
+                  style="--rating: {{ variant.metafields.reviews.rating.value.rating | floor }}; --rating-max: {{ variant.metafields.reviews.rating.value.scale_max }}; --rating-decimal: {{ rating_decimal }};"
                 ></span>
               </div>
               <p class="rating-text caption">
                 <span aria-hidden="true">
-                  {{- card_product.metafields.reviews.rating.value }} /
-                  {{ card_product.metafields.reviews.rating.value.scale_max -}}
+                  {{- variant.metafields.reviews.rating.value }} /
+                  {{ variant.metafields.reviews.rating.value.scale_max -}}
                 </span>
               </p>
               <p class="rating-count caption">
-                <span aria-hidden="true">({{ card_product.metafields.reviews.rating_count }})</span>
+                <span aria-hidden="true">({{ variant.metafields.reviews.rating_count }})</span>
                 <span class="visually-hidden">
-                  {{- card_product.metafields.reviews.rating_count }}
+                  {{- variant.metafields.reviews.rating_count }}
                   {{ 'accessibility.total_reviews' | t -}}
                 </span>
               </p>
             {%- endif -%}
 
-            {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
-            {%- if card_product.quantity_price_breaks_configured? -%}
-              {% if card_product.variants.size == 1 and quick_add == 'bulk' %}
+            {% render 'price', product: variant, price_class: '', show_compare_at_price: true %}
+            {%- if variant.quantity_price_breaks_configured? -%}
+              {% if variant.variants.size == 1 and quick_add == 'bulk' %}
                 {% liquid
-                  assign quantity_rule = card_product.selected_or_first_available_variant.quantity_rule
+                  assign quantity_rule = variant.selected_or_first_available_variant.quantity_rule
                   assign has_qty_rules = false
                   if quantity_rule.increment > 1 or quantity_rule.min > 1 or quantity_rule.max != null
                     assign has_qty_rules = true
@@ -226,12 +226,12 @@
                   <span class="caption">{{ 'products.product.volume_pricing.note' | t }}</span>
                 </div>
               {% endif %}
-              {% if card_product.variants.size == 1 and quick_add == 'bulk' %}
+              {% if variant.variants.size == 1 and quick_add == 'bulk' %}
                 <div
                   class="global-settings-popup quantity-popover__info"
                   tabindex="-1"
                   hidden
-                  id="quantity-popover-info-{{ card_product.selected_or_first_available_variant.id }}"
+                  id="quantity-popover-info-{{ variant.selected_or_first_available_variant.id }}"
                 >
                   {%- if has_qty_rules -%}
                     <div class="quantity__rules caption no-js-hidden">
@@ -259,17 +259,15 @@
                   >
                     {{- 'icon-close.svg' | inline_asset_content -}}
                   </button>
-                  {%- if card_product.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
+                  {%- if variant.selected_or_first_available_variant.quantity_price_breaks.size > 0 -%}
                     <volume-pricing class="parent-display">
                       <ul class="list-unstyled">
                         <li>
-                          <span>{{ card_product.selected_or_first_available_variant.quantity_rule.min }}+</span>
-                          {%- assign price = card_product.selected_or_first_available_variant.price
-                            | money_with_currency
-                          -%}
+                          <span>{{ variant.selected_or_first_available_variant.quantity_rule.min }}+</span>
+                          {%- assign price = variant.selected_or_first_available_variant.price | money_with_currency -%}
                           <span>{{ 'sections.quick_order_list.each' | t: money: price }}</span>
                         </li>
-                        {%- for price_break in card_product.selected_or_first_available_variant.quantity_price_breaks -%}
+                        {%- for price_break in variant.selected_or_first_available_variant.quantity_price_breaks -%}
                           <li>
                             <span>
                               {{- price_break.minimum_quantity -}}
@@ -288,25 +286,25 @@
             {%- endif -%}
           </div>
         </div>
-        {% assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id %}
+        {% assign product_form_id = 'quick-add-' | append: section_id | append: variant.id %}
         {% if quick_add == 'standard' %}
           <div class="quick-add no-js-hidden">
             {%- liquid
               assign qty_rules = false
-              if card_product.selected_or_first_available_variant.quantity_rule.min > 1 or card_product.selected_or_first_available_variant.quantity_rule.max != null or card_product.selected_or_first_available_variant.quantity_rule.increment > 1
+              if variant.selected_or_first_available_variant.quantity_rule.min > 1 or variant.selected_or_first_available_variant.quantity_rule.max != null or variant.selected_or_first_available_variant.quantity_rule.increment > 1
                 assign qty_rules = true
               endif
             -%}
-            {%- if card_product.variants.size > 1 or qty_rules -%}
-              <modal-opener data-modal="#QuickAdd-{{ card_product.id }}">
+            {%- if variant.variants.size > 1 or qty_rules -%}
+              <modal-opener data-modal="#QuickAdd-{{ variant.id }}">
                 <button
                   id="{{ product_form_id }}-submit"
                   type="submit"
                   name="add"
                   class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add animate-arrow{% endif %}"
                   aria-haspopup="dialog"
-                  aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
-                  data-product-url="{{ card_product.url }}"
+                  aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ variant.id }}"
+                  data-product-url="{{ variant.url }}"
                 >
                   {{ 'products.product.choose_options' | t }}
                   {%- if horizontal_quick_add -%}
@@ -317,29 +315,29 @@
                   {%- render 'loading-spinner' -%}
                 </button>
               </modal-opener>
-              <quick-add-modal id="QuickAdd-{{ card_product.id }}" class="quick-add-modal">
+              <quick-add-modal id="QuickAdd-{{ variant.id }}" class="quick-add-modal">
                 <div
                   role="dialog"
-                  aria-label="{{ 'products.product.choose_product_options' | t: product_name: card_product.title | escape }}"
+                  aria-label="{{ 'products.product.choose_product_options' | t: product_name: variant.title | escape }}"
                   aria-modal="true"
                   class="quick-add-modal__content global-settings-popup"
                   tabindex="-1"
                 >
                   <button
-                    id="ModalClose-{{ card_product.id }}"
+                    id="ModalClose-{{ variant.id }}"
                     type="button"
                     class="quick-add-modal__toggle"
                     aria-label="{{ 'accessibility.close' | t }}"
                   >
                     {{- 'icon-close.svg' | inline_asset_content -}}
                   </button>
-                  <div id="QuickAddInfo-{{ card_product.id }}" class="quick-add-modal__content-info"></div>
+                  <div id="QuickAddInfo-{{ variant.id }}" class="quick-add-modal__content-info"></div>
                 </div>
               </quick-add-modal>
             {%- else -%}
               <product-form data-section-id="{{ section.id }}">
                 {%- form 'product',
-                  card_product,
+                  variant,
                   id: product_form_id,
                   class: 'form',
                   novalidate: 'novalidate',
@@ -348,9 +346,9 @@
                   <input
                     type="hidden"
                     name="id"
-                    value="{{ card_product.selected_or_first_available_variant.id }}"
+                    value="{{ variant.selected_or_first_available_variant.id }}"
                     class="product-variant-id"
-                    {% if card_product.selected_or_first_available_variant.available == false %}
+                    {% if variant.selected_or_first_available_variant.available == false %}
                       disabled
                     {% endif %}
                   >
@@ -360,15 +358,15 @@
                     name="add"
                     class="quick-add__submit button button--full-width button--secondary{% if horizontal_quick_add %} card--horizontal__quick-add{% endif %}"
                     aria-haspopup="dialog"
-                    aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
+                    aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ variant.id }}"
                     aria-live="polite"
                     data-sold-out-message="true"
-                    {% if card_product.selected_or_first_available_variant.available == false %}
+                    {% if variant.selected_or_first_available_variant.available == false %}
                       disabled
                     {% endif %}
                   >
                     <span>
-                      {%- if card_product.selected_or_first_available_variant.available -%}
+                      {%- if variant.selected_or_first_available_variant.available -%}
                         {{ 'products.product.add_to_cart' | t }}
                       {%- else -%}
                         {{ 'products.product.sold_out' | t }}
@@ -389,20 +387,20 @@
             {%- endif -%}
           </div>
         {% elsif quick_add == 'bulk' %}
-          {% if card_product.variants.size == 1 %}
+          {% if variant.variants.size == 1 %}
             <quick-add-bulk
-              data-min="{{ card_product.selected_or_first_available_variant.quantity_rule.min }}"
-              id="quick-add-bulk-{{ card_product.selected_or_first_available_variant.id }}-{{ section.id }}"
+              data-min="{{ variant.selected_or_first_available_variant.quantity_rule.min }}"
+              id="quick-add-bulk-{{ variant.selected_or_first_available_variant.id }}-{{ section.id }}"
               class="quick-add-bulk"
-              data-index="{{ card_product.selected_or_first_available_variant.id }}"
+              data-index="{{ variant.selected_or_first_available_variant.id }}"
             >
-              {% if card_product.selected_or_first_available_variant.available == false %}
+              {% if variant.selected_or_first_available_variant.available == false %}
                 <button
                   id="{{ product_form_id }}-submit"
                   type="submit"
                   name="add"
                   class="quick-add__submit button button--full-width button--secondary"
-                  aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
+                  aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ variant.id }}"
                   data-sold-out-message="true"
                   disabled
                 >
@@ -412,21 +410,21 @@
                   </span>
                 </button>
               {% else %}
-                {% render 'quantity-input', variant: card_product.selected_or_first_available_variant, min: 0 %}
+                {% render 'quantity-input', variant: variant.selected_or_first_available_variant, min: 0 %}
               {% endif %}
             </quick-add-bulk>
           {% else %}
             <div class="quick-add no-js-hidden">
               {%- liquid
-                assign product_form_id = 'quick-add-' | append: section_id | append: card_product.id
+                assign product_form_id = 'quick-add-' | append: section_id | append: variant.id
                 assign qty_rules = false
-                if card_product.selected_or_first_available_variant.quantity_rule.min > 1 or card_product.selected_or_first_available_variant.quantity_rule.max != null or card_product.selected_or_first_available_variant.quantity_rule.increment > 1
+                if variant.selected_or_first_available_variant.quantity_rule.min > 1 or variant.selected_or_first_available_variant.quantity_rule.max != null or variant.selected_or_first_available_variant.quantity_rule.increment > 1
                   assign qty_rules = true
                 endif
               -%}
               <modal-opener
-                id="QuickBulk-{{ card_product.id }}-{{ section_id }}"
-                data-modal="#QuickAddBulk-{{ card_product.id }}-{{ section.id }}"
+                id="QuickBulk-{{ variant.id }}-{{ section_id }}"
+                data-modal="#QuickAddBulk-{{ variant.id }}-{{ section.id }}"
               >
                 <button
                   id="{{ product_form_id }}-submit"
@@ -434,26 +432,26 @@
                   name="add"
                   class="quick-add__submit button button--full-width button--secondary"
                   aria-haspopup="dialog"
-                  aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ card_product.id }}"
-                  data-product-url="{{ card_product.url }}"
+                  aria-labelledby="{{ product_form_id }}-submit title-{{ section_id }}-{{ variant.id }}"
+                  data-product-url="{{ variant.url }}"
                 >
                   {{ 'products.product.choose_options' | t }}
                   {%- render 'loading-spinner' -%}
                 </button>
               </modal-opener>
               <modal-dialog
-                id="QuickAddBulk-{{ card_product.id }}-{{ section_id }}"
+                id="QuickAddBulk-{{ variant.id }}-{{ section_id }}"
                 class="quick-add-modal color-{{ section.settings.color_scheme }}"
               >
                 <div
                   role="dialog"
-                  aria-label="{{ 'products.product.choose_product_options' | t: product_name: card_product.title | escape }}"
+                  aria-label="{{ 'products.product.choose_product_options' | t: product_name: variant.title | escape }}"
                   aria-modal="true"
                   class="quick-add-modal__content quick-add-modal__content--bulk global-settings-popup"
                   tabindex="-1"
                 >
                   <button
-                    id="ModalClose-{{ card_product.id }}"
+                    id="ModalClose-{{ variant.id }}"
                     type="button"
                     class="quick-add-modal__toggle"
                     aria-label="{{ 'accessibility.close' | t }}"
@@ -461,12 +459,12 @@
                     {{- 'icon-close.svg' | inline_asset_content -}}
                   </button>
                   <div
-                    id="QuickAddInfo-{{ card_product.id }}"
+                    id="QuickAddInfo-{{ variant.id }}"
                     class="quick-add-modal__content-info quick-add-modal__content-info--bulk"
                   >
                     <div class="quick-add__content-info__media">
                       <div class="quick-add__info">
-                        {%- if card_product.featured_media -%}
+                        {%- if variant.featured_media -%}
                           <div
                             class="quick-add__product-media"
                           >
@@ -474,33 +472,33 @@
                               {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
                               <img
                                 srcset="
-                                  {%- if card_product.featured_media.width >= 165 -%}{{ card_product.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
-                                  {%- if card_product.featured_media.width >= 360 -%}{{ card_product.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
-                                  {%- if card_product.featured_media.width >= 533 -%}{{ card_product.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
-                                  {%- if card_product.featured_media.width >= 720 -%}{{ card_product.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
-                                  {%- if card_product.featured_media.width >= 940 -%}{{ card_product.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
-                                  {%- if card_product.featured_media.width >= 1066 -%}{{ card_product.featured_media | image_url: width: 1066 }} 1066w,{%- endif -%}
-                                  {{ card_product.featured_media | image_url }} {{ card_product.featured_media.width }}w
+                                  {%- if variant.featured_media.width >= 165 -%}{{ variant.featured_media | image_url: width: 165 }} 165w,{%- endif -%}
+                                  {%- if variant.featured_media.width >= 360 -%}{{ variant.featured_media | image_url: width: 360 }} 360w,{%- endif -%}
+                                  {%- if variant.featured_media.width >= 533 -%}{{ variant.featured_media | image_url: width: 533 }} 533w,{%- endif -%}
+                                  {%- if variant.featured_media.width >= 720 -%}{{ variant.featured_media | image_url: width: 720 }} 720w,{%- endif -%}
+                                  {%- if variant.featured_media.width >= 940 -%}{{ variant.featured_media | image_url: width: 940 }} 940w,{%- endif -%}
+                                  {%- if variant.featured_media.width >= 1066 -%}{{ variant.featured_media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                                  {{ variant.featured_media | image_url }} {{ variant.featured_media.width }}w
                                 "
-                                src="{{ card_product.featured_media | image_url: width: 533 }}"
+                                src="{{ variant.featured_media | image_url: width: 533 }}"
                                 sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
-                                alt="{{ card_product.featured_media.alt | escape }}"
+                                alt="{{ variant.featured_media.alt | escape }}"
                                 class="motion-reduce"
                                 {% unless lazy_load == false %}
                                   loading="lazy"
                                 {% endunless %}
-                                width="{{ card_product.featured_media.width }}"
-                                height="{{ card_product.featured_media.height }}"
+                                width="{{ variant.featured_media.width }}"
+                                height="{{ variant.featured_media.height }}"
                               >
                               {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
                             </div>
                           </div>
                         {%- endif -%}
                         <a
-                          {% if card_product == blank %}
+                          {% if variant == blank %}
                             role="link" aria-disabled="true"
                           {% else %}
-                            href="{{ card_product.url }}"
+                            href="{{ variant.url }}"
                           {% endif %}
                           class="link product__view-details animate-arrow small-hide medium-hide"
                         >
@@ -509,11 +507,11 @@
                         </a>
                       </div>
                       <div class="quick-add-modal__content-info--bulk-details large-up-hide">
-                        <a href="{{ card_product.url }}" class="full-unstyled-link">
-                          <h3>{{ card_product.title | escape }}</h3>
+                        <a href="{{ variant.url }}" class="full-unstyled-link">
+                          <h3>{{ variant.title | escape }}</h3>
                         </a>
-                        {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
-                        {%- if card_product.quantity_price_breaks_configured? -%}
+                        {% render 'price', product: variant, price_class: '', show_compare_at_price: true %}
+                        {%- if variant.quantity_price_breaks_configured? -%}
                           <div class="card__information-volume-pricing-note">
                             <span class="caption">{{ 'products.product.volume_pricing.note' | t }}</span>
                           </div>
@@ -522,23 +520,23 @@
                     </div>
                     <div>
                       <div class="quick-add-modal__content-info--bulk-details small-hide medium-hide">
-                        <a href="{{ card_product.url }}" class="full-unstyled-link">
+                        <a href="{{ variant.url }}" class="full-unstyled-link">
                           <h3 class="h2">
-                            {{ card_product.title | escape }}
+                            {{ variant.title | escape }}
                           </h3>
                         </a>
-                        {% render 'price', product: card_product, price_class: '', show_compare_at_price: true %}
-                        {%- if card_product.quantity_price_breaks_configured? -%}
+                        {% render 'price', product: variant, price_class: '', show_compare_at_price: true %}
+                        {%- if variant.quantity_price_breaks_configured? -%}
                           <div class="card__information-volume-pricing-note">
                             <span class="caption">{{ 'products.product.volume_pricing.note' | t }}</span>
                           </div>
                         {%- endif -%}
                       </div>
                       <bulk-modal
-                        id="QuickBulkModal-{{ card_product.id }}-{{ section_id }}"
-                        data-url="{{ card_product.url }}"
+                        id="QuickBulkModal-{{ variant.id }}-{{ section_id }}"
+                        data-url="{{ variant.url }}"
                         data-section-id="{{ section_id }}"
-                        data-product-id="{{ card_product.id }}"
+                        data-product-id="{{ variant.id }}"
                       >
                       </bulk-modal>
                     </div>
@@ -549,16 +547,16 @@
           {% endif %}
         {% endif %}
         <div class="card__badge {{ settings.badge_position }}">
-          {%- if card_product.available == false -%}
+          {%- if variant.available == false -%}
             <span
-              id="Badge-{{ section_id }}-{{ card_product.id }}"
+              id="Badge-{{ section_id }}-{{ variant.id }}"
               class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}"
             >
               {{- 'products.product.sold_out' | t -}}
             </span>
-          {%- elsif card_product.compare_at_price > card_product.price and card_product.available -%}
+          {%- elsif variant.compare_at_price > variant.price and variant.available -%}
             <span
-              id="Badge-{{ section_id }}-{{ card_product.id }}"
+              id="Badge-{{ section_id }}-{{ variant.id }}"
               class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}"
             >
               {{- 'products.product.on_sale' | t -}}
