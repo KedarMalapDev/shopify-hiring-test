@@ -20,6 +20,8 @@
   Usage:
   {% render 'card-product', show_vendor: section.settings.show_vendor %}
 {% endcomment %}
+<script src="{{ 'card-product.js' | asset_url }}" defer></script>
+
 {%- unless skip_styles -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
   {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
@@ -146,37 +148,35 @@
       </div>
 
       <div class="card__content">
-        {% if variant.available %}
-          {%- if available_sizes != '' -%}
-            <div class="available-sizes">
-              <ul>
-                {%- assign sizes = available_sizes | split: ',' -%}
-                {% for size in sizes %}
-                  {% if size != '' %}
-                    {% assign size_details = size | split: '|' %}
-                    <li>
-                      <button
-                        class="{% if size_details[2] == 'false' %}unavailable{% endif %}"
-                        {% if size_details[2] == 'false' %}
-                          aria-disabled="true"
-                          style="pointer-events: none;"
-                        {% endif %}
-                        data-variant-id="{{ size_details[3] }}"
-                        data-size="{{ size_details[0] }}"
-                        onclick="addToCart(this)"
-                      >
-                        {% if size_details[2] == 'false' %}
-                          <s>{{ size_details[0] }}</s>
-                        {% else %}
-                          {{ size_details[0] }}
-                        {% endif %}
-                      </button>
-                    </li>
-                  {% endif %}
-                {% endfor %}
-              </ul>
-            </div>
-          {%- endif -%}
+        {% if variant.available and available_sizes != '' %}
+          <div class="available-sizes">
+            <ul>
+              {% assign sizes = available_sizes | split: ',' %}
+              {% for size in sizes %}
+                {% assign size_details = size | split: '|' %}
+                {% if size_details[0] != '' %}
+                  <li>
+                    <button
+                      class="{% if size_details[2] == 'false' %}unavailable{% endif %}"
+                      {% if size_details[2] == 'false' %}
+                        aria-disabled="true"
+                        style="pointer-events: none;"
+                      {% endif %}
+                      data-variant-id="{{ size_details[3] }}"
+                      data-size="{{ size_details[0] }}"
+                      onclick="addToCart(this)"
+                    >
+                      {% if size_details[2] == 'false' %}
+                        <s>{{ size_details[0] }}</s>
+                      {% else %}
+                        {{ size_details[0] }}
+                      {% endif %}
+                    </button>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
         {% endif %}
         <div class="card__information">
           <h3
@@ -197,7 +197,7 @@
           <div class="card-information">
             {%- if show_vendor -%}
               <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
-              <div class="caption-with-letter-spacing light">{{ card_product.vendor }}</div>
+              <div class="vendor caption-with-letter-spacing light">{{ card_product.vendor }}</div>
             {%- endif -%}
 
             <span class="caption-large light">{{ block.settings.description | escape }}</span>
@@ -654,119 +654,3 @@
     </div>
   </div>
 {%- endif -%}
-
-<style>
-  .card-wrapper {
-    position: relative;
-    display: block;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-
-  .available-sizes {
-    position: absolute;
-    top: 0;
-    z-index: 10000;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 5px 0;
-    width: 100%;
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-
-  .card-wrapper:hover .available-sizes {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .available-sizes ul {
-    display: flex;
-    flex-wrap: wrap;
-    list-style: none;
-    width: 100%;
-    justify-content: space-around;
-    margin: 0;
-    padding: 0;
-    text-transform: uppercase;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .available-sizes li button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px;
-    text-transform: uppercase;
-  }
-
-  .available-sizes li button::after {
-    content: '';
-    display: block;
-    height: 1px;
-    background-color: black;
-    margin-top: 1px;
-    visibility: hidden;
-  }
-
-  .available-sizes li button:hover::after {
-    visibility: visible;
-  }
-
-  .available-sizes .unavailable {
-    color: #999;
-    cursor: not-allowed;
-  }
-
-  .available-sizes .unavailable s {
-    text-decoration: line-through;
-  }
-</style>
-
-<script>
-  function updateCartCount(newCount) {
-    const cartCountBubbles = document.querySelectorAll('.cart-count-bubble');
-    cartCountBubbles.forEach((bubble) => {
-      if (newCount > 0) {
-        bubble.textContent = newCount;
-        bubble.classList.remove('hidden');
-      } else {
-        bubble.classList.add('hidden');
-      }
-    });
-  }
-
-  function addToCart(button) {
-    const variantId = button.getAttribute('data-variant-id');
-
-    let formData = {
-      items: [
-        {
-          id: variantId,
-          quantity: 1,
-        },
-      ],
-    };
-
-    fetch(window.Shopify.routes.root + 'cart/add.js', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Product added to cart:', data);
-
-        const cartDrawer = document.querySelector('cart-drawer');
-        if (cartDrawer) {
-          cartDrawer.open();
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-  }
-</script>

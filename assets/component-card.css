@@ -1,8 +1,82 @@
 .card-wrapper {
   color: inherit;
   height: 100%;
-  position: relative;
   text-decoration: none;
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.available-sizes {
+  position: absolute;
+  top: 0;
+  z-index: 10000;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 5px 0;
+  width: 100%;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.card-wrapper:hover .available-sizes {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.available-sizes ul {
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none;
+  width: 100%;
+  justify-content: space-around;
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.available-sizes li button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  text-transform: uppercase;
+}
+
+.available-sizes li button::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background-color: black;
+  margin-top: 1px;
+  visibility: hidden;
+}
+
+.available-sizes li button:hover::after {
+  visibility: visible;
+}
+
+.available-sizes .unavailable {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.available-sizes .unavailable s {
+  text-decoration: line-through;
+}
+
+.card-information .vendor {
+  font-size: 1.15rem;
+  letter-spacing: 0.2rem;
+  line-height: calc(1 + 0.4 / var(--font-body-scale));
+  text-transform: uppercase;
+}
+
+.light {
+  opacity: 8;
 }
 
 .card {
