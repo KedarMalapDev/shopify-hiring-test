@@ -20,7 +20,7 @@
   Usage:
   {% render 'card-product', show_vendor: section.settings.show_vendor %}
 {% endcomment %}
-<script src="{{ 'card-product.js' | asset_url }}" defer></script>
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 
 {%- unless skip_styles -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
@@ -43,7 +43,7 @@
     endif
   -%}
 
-  <div class="card-wrapper product-card-wrapper underline-links-hover" data-cart-type="{{ settings.cart_type }}">
+  <div class="card-wrapper product-card-wrapper underline-links-hover">
     <div
       class="
         card card--{{ settings.card_style }}
@@ -147,7 +147,7 @@
         </div>
       </div>
 
-      <div class="card__content">
+      <div class="card__content" data-product-id="{{ card_product.id }}">
         {% if variant.available and available_sizes != '' %}
           <div class="available-sizes">
             <ul>
@@ -156,28 +156,48 @@
                 {% assign size_details = size | split: '|' %}
                 {% if size_details[0] != '' %}
                   <li>
-                    <button
-                      class="{% if size_details[2] == 'false' %}unavailable{% endif %}"
-                      {% if size_details[2] == 'false' %}
-                        aria-disabled="true"
-                        style="pointer-events: none;"
-                      {% endif %}
-                      data-variant-id="{{ size_details[3] }}"
-                      data-size="{{ size_details[0] }}"
-                      onclick="addToCart(this)"
-                    >
-                      {% if size_details[2] == 'false' %}
-                        <s>{{ size_details[0] }}</s>
-                      {% else %}
-                        {{ size_details[0] }}
-                      {% endif %}
-                    </button>
+                    <product-form>
+                      <form
+                        class="available-sizes-form"
+                        data-section-id="{{ section.id }}"
+                        method="post"
+                        action="/cart/add"
+                        novalidate
+                        data-type="add-to-cart-form"
+                      >
+                        <input type="hidden" name="id" value="{{ size_details[3] }}">
+                        <button
+                          class="{% if size_details[2] == 'false' %}unavailable{% endif %}"
+                          {% if size_details[2] == 'false' %}
+                            aria-disabled="true"
+                            style="pointer-events: none;"
+                          {% endif %}
+                          type="submit"
+                        >
+                          {% if size_details[2] == 'false' %}
+                            <s>{{ size_details[0] }}</s>
+                          {% else %}
+                            {{ size_details[0] }}
+                          {% endif %}
+                        </button>
+                      </form>
+                      <div class="product-form__error-message-wrapper" role="alert" hidden>
+                        <span class="svg-wrapper">
+                          {{- 'icon-error.svg' | inline_asset_content -}}
+                        </span>
+                        <span class="product-form__error-message"></span>
+                        <div class="loading__spinner hidden">
+                          {%- render 'loading-spinner' -%}
+                        </div>
+                      </div>
+                    </product-form>
                   </li>
                 {% endif %}
               {% endfor %}
             </ul>
           </div>
         {% endif %}
+
         <div class="card__information">
           <h3
             class="card__heading{% if variant.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
