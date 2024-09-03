@@ -87,6 +87,8 @@ document.querySelectorAll('[id^="Details-"] summary').forEach((summary) => {
 const trapFocusHandlers = {};
 
 function trapFocus(container, elementToFocus = container) {
+  if (!container) return;
+
   var elements = getFocusableElements(container);
   var first = elements[0];
   var last = elements[elements.length - 1];

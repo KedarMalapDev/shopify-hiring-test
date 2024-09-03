@@ -173,6 +173,26 @@
                       {% endif %}
                     {%- endfor -%}
 
+                    {% assign available_sizes = '' %}
+                    {%- for inner_variant in product.variants -%}
+                      {% if inner_variant.option1 == color %}
+                        {% assign size = inner_variant.option2 %}
+                        {% assign size_link = inner_variant.url %}
+                        {% assign size_available = inner_variant.available %}
+                        {% assign variant_id = inner_variant.id %}
+                        {% assign available_sizes = available_sizes
+                          | append: size
+                          | append: '|'
+                          | append: size_link
+                          | append: '|'
+                          | append: size_available
+                          | append: '|'
+                          | append: variant_id
+                          | append: ','
+                        %}
+                      {% endif %}
+                    {%- endfor -%}
+
                     <li
                       class="grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
                       {% if settings.animations_reveal_on_scroll %}
@@ -193,7 +213,8 @@
                         lazy_load: lazy_load,
                         skip_styles: skip_card_product_styles,
                         quick_add: section.settings.quick_add,
-                        section_id: section.id
+                        section_id: section.id,
+                        available_sizes: available_sizes
                       %}
                     </li>
                     {% assign displayed_colors = displayed_colors | append: color | append: ',' %}
@@ -215,11 +236,6 @@
     {{ 'mask-arch.svg' | inline_asset_content }}
   {%- endif -%}
 </div>
-
-<script>
-  let productsJson = {{ collection.products | json }};
-  console.log(productsJson);
-</script>
 
 {% schema %}
 {
