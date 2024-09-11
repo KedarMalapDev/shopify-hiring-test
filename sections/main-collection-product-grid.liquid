@@ -184,7 +184,6 @@
                             {% break %}
                           {% endif %}
                         {% endfor %}
-                        {% comment %} {% if unique_colors_count > 1 %} {% endcomment %}
                         <li class="grid__item variant">
                           {% render 'product-card-variant',
                             product_card_product: product,
@@ -203,7 +202,6 @@
                             second_image: second_image
                           %}
                         </li>
-                        {% comment %} {% endif %} {% endcomment %}
                       {% endunless %}
                     {% endfor %}
                     {% break %}
