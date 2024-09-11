@@ -56,7 +56,7 @@
         class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %}{% if variant.featured_media or settings.card_style == 'standard' %} ratio{% endif %}"
         style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
       >
-        {%- assign media = variant.featured_media | default: product_card_product.featured_media -%}
+        {%- assign media = first_image | default: product_card_product.featured_media -%}
         {%- if media -%}
           <div class="card__media{% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}">
             <div class="media media--transparent media--hover-effect">
@@ -83,7 +83,7 @@
               >
               {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
 
-              {%- if variant.media[1] != null and show_secondary_image -%}
+              {%- if second_image != null and show_secondary_image -%}
                 <img
                   srcset="
                     {%- if variant.media[1].width >= 165 -%}{{ variant.media[1] | image_url: width: 165 }} 165w,{%- endif -%}
@@ -94,7 +94,7 @@
                     {%- if variant.media[1].width >= 1066 -%}{{ variant.media[1] | image_url: width: 1066 }} 1066w,{%- endif -%}
                     {{ variant.media[1] | image_url }} {{ variant.media[1].width }}w
                   "
-                  src="{{ variant.media[1] | image_url: width: 533 }}"
+                  src="{{ second_image | image_url: width: 533 }}"
                   sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
                   alt=""
                   class="motion-reduce"
@@ -155,7 +155,7 @@
       <div class="card__content">
         <div class="card__information">
           <h3
-            class="card__heading{% if product_card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
+            class="card__heading_variant{% if product_card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
             {% if product_card_product.featured_media or settings.card_style == 'card' %}
               id="title-{{ section_id }}-{{ variant.id }}"
             {% endif %}

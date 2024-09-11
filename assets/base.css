@@ -3628,6 +3628,7 @@ details-disclosure > details {
   margin: 0;
   flex-wrap: wrap;
   gap: 10px;
+  color: black;
 }
 
 /* .size-options-list li {
@@ -3648,4 +3649,16 @@ details-disclosure > details {
   user-select: none;
   text-decoration: line-through;
   opacity: 0.6;
+}
+
+.card__badge {
+  z-index: 999;
+}
+
+.card__heading_variant {
+  font-size: var(--font-body-scale);
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0;
+  text-transform: capitalize;
 }

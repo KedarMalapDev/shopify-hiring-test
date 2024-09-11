@@ -12,8 +12,9 @@
 
 {%- if section.settings.quick_add == 'standard' -%}
   <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
+
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
 
 {%- if section.settings.quick_add == 'bulk' -%}
   <script src="{{ 'quick-add-bulk.js' | asset_url }}" defer="defer"></script>
@@ -153,78 +154,63 @@
                 grid--{{ section.settings.columns_desktop }}-col-desktop
               "
             >
-              {% if template == 'collection' %}
-                {% assign skip_card_product_styles = false %}
-                {% for product in collection.products %}
-                  {% assign lazy_load = false %}
-                  {%- if forloop.index > 2 -%}
-                    {%- assign lazy_load = true -%}
-                  {%- endif -%}
-                  {% assign product_option_color = false %}
-                  {% assign color_count = 0 %}
-                  {% for product_option in product.options_with_values %}
-                    {% if product_option.name == 'Color' %}
-                      {% for value in product_option.values %}
-                        {% assign color_count = color_count | plus: 1 %}
-                        {% if color_count > 1 %}
-                          {% assign product_option_color = true %}
-                          {% break %}
-                        {% endif %}
-                      {% endfor %}
-
-                      {% if product_option_color %}
-                        {% assign product_option_key = 'option' | append: forloop.index %}
-                        {% for value in product_option.values %}
-                          {% for variant in product.variants %}
-                            {% if value == variant[product_option_key] %}
-                              <li class="grid__item variant">
-                                {% render 'product-card-variant',
-                                  product_card_product: product,
-                                  product_option_key: product_option_key,
-                                  media_aspect_ratio: section.settings.image_ratio,
-                                  image_shape: section.settings.image_shape,
-                                  show_secondary_image: section.settings.show_secondary_image,
-                                  show_vendor: section.settings.show_vendor,
-                                  show_rating: section.settings.show_rating,
-                                  lazy_load: lazy_load,
-                                  skip_styles: skip_card_product_styles,
-                                  quick_add: section.settings.quick_add,
-                                  section_id: section.id,
-                                  variant: variant
-                                %}
-                              </li>
-                              {% break %}
-                            {% endif %}
-                          {% endfor %}
+              {% assign skip_card_product_styles = false %}
+              {% for product in collection.products %}
+                {% assign lazy_load = false %}
+                {%- if forloop.index > 2 -%}
+                  {%- assign lazy_load = true -%}
+                {%- endif -%}
+                {% assign product_option_color = false %}
+                {% for product_option in product.options_with_values %}
+                  {% if product_option.name == 'Color' %}
+                    {% assign product_option_color = true %}
+                    {% assign product_option_key = 'option' | append: forloop.index %}
+                    {% assign color_variants = product.variants %}
+                    {% assign unique_colors = '' %}
+                    {% assign unique_colors_count = 0 %}
+                    {% for variant in color_variants %}
+                      {% assign color_value = variant[product_option_key] %}
+                      {% unless unique_colors contains color_value %}
+                        {% assign unique_colors = unique_colors | append: color_value | append: ',' %}
+                        {% assign unique_colors_count = unique_colors_count | plus: 1 %}
+                        {% assign first_variant = variant %}
+                        {% assign first_image = first_variant.featured_image %}
+                        {% assign second_image = first_image %}
+                        {% for variant_check in color_variants %}
+                          {% if variant_check[product_option_key] == color_value
+                            and variant_check.featured_image != first_image
+                          %}
+                            {% assign second_image = variant_check.featured_image %}
+                            {% break %}
+                          {% endif %}
                         {% endfor %}
-                      {% endif %}
-                    {% endif %}
-                  {% endfor %}
-
-                  {% if product_option_color == false %}
-                    <li class="grid__item">
-                      {% render 'card-product',
-                        card_product: product,
-                        media_aspect_ratio: section.settings.image_ratio,
-                        image_shape: section.settings.image_shape,
-                        show_secondary_image: section.settings.show_secondary_image,
-                        show_vendor: section.settings.show_vendor,
-                        show_rating: section.settings.show_rating,
-                        lazy_load: lazy_load,
-                        skip_styles: skip_card_product_styles,
-                        quick_add: section.settings.quick_add,
-                        section_id: section.id
-                      %}
-                    </li>
+                        {% comment %} {% if unique_colors_count > 1 %} {% endcomment %}
+                        <li class="grid__item variant">
+                          {% render 'product-card-variant',
+                            product_card_product: product,
+                            product_option_key: product_option_key,
+                            media_aspect_ratio: section.settings.image_ratio,
+                            image_shape: section.settings.image_shape,
+                            show_secondary_image: section.settings.show_secondary_image,
+                            show_vendor: section.settings.show_vendor,
+                            show_rating: section.settings.show_rating,
+                            lazy_load: lazy_load,
+                            skip_styles: skip_card_product_styles,
+                            quick_add: section.settings.quick_add,
+                            section_id: section.id,
+                            variant: first_variant,
+                            first_image: first_image,
+                            second_image: second_image
+                          %}
+                        </li>
+                        {% comment %} {% endif %} {% endcomment %}
+                      {% endunless %}
+                    {% endfor %}
+                    {% break %}
                   {% endif %}
-                {%- endfor -%}
-              {% else %}
-                {% assign skip_card_product_styles = false %}
-                {%- for product in collection.products -%}
-                  {% assign lazy_load = false %}
-                  {%- if forloop.index > 2 -%}
-                    {%- assign lazy_load = true -%}
-                  {%- endif -%}
+                {% endfor %}
+
+                {% if product_option_color == false %}
                   <li class="grid__item">
                     {% render 'card-product',
                       card_product: product,
@@ -239,8 +225,8 @@
                       section_id: section.id
                     %}
                   </li>
-                {%- endfor -%}
-              {% endif %}
+                {% endif %}
+              {%- endfor -%}
             </ul>
 
             {%- if paginate.pages > 1 -%}
