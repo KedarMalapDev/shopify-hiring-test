@@ -115,10 +115,10 @@
               {% endif %}
             >
               <a
-                href="{{ product_card_product.url }}"
-                id="StandardCardNoMediaLink-{{ section_id }}-{{ product_card_product.id }}"
+                href="{{ variant.url }}"
+                id="StandardCardNoMediaLink-{{ section_id }}-{{ variant.id }}"
                 class="full-unstyled-link"
-                aria-labelledby="StandardCardNoMediaLink-{{ section_id }}-{{ product_card_product.id }} NoMediaStandardBadge-{{ section_id }}-{{ product_card_product.id }}"
+                aria-labelledby="StandardCardNoMediaLink-{{ section_id }}-{{ variant.id }} NoMediaStandardBadge-{{ section_id }}-{{ variant.id }}"
               >
                 {{ product_card_product.title | escape }} - {{ variant[product_option_key] }}
               </a>
@@ -155,18 +155,18 @@
       <div class="card__content">
         <div class="card__information">
           <h3
-            class="card__heading{% if card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
-            {% if card_product.featured_media or settings.card_style == 'card' %}
-              id="title-{{ section_id }}-{{ card_product.id }}"
+            class="card__heading{% if product_card_product.featured_media or settings.card_style == 'standard' %} h5{% endif %}"
+            {% if product_card_product.featured_media or settings.card_style == 'card' %}
+              id="title-{{ section_id }}-{{ variant.id }}"
             {% endif %}
           >
             <a
-              href="{{ card_product.url }}"
-              id="CardLink-{{ section_id }}-{{ card_product.id }}"
+              href="{{ variant.url }}"
+              id="CardLink-{{ section_id }}-{{ variant.id }}"
               class="full-unstyled-link"
-              aria-labelledby="CardLink-{{ section_id }}-{{ card_product.id }} Badge-{{ section_id }}-{{ card_product.id }}"
+              aria-labelledby="CardLink-{{ section_id }}-{{ variant.id }} Badge-{{ section_id }}-{{ variant.id }}"
             >
-              {{ card_product.title | escape }}
+              {{ product_card_product.title | escape }} - {{ variant[product_option_key] }}
             </a>
           </h3>
           <div class="card-information">

@@ -176,6 +176,9 @@
                         {% assign product_option_key = 'option' | append: forloop.index %}
                         {% for value in product_option.values %}
                           {% for variant in product.variants %}
+                            <script>
+                              console.log("Variant:",{{variant | json }})
+                            </script>
                             {% if value == variant[product_option_key] %}
                               <li class="grid__item variant">
                                 {% render 'product-card-variant',
