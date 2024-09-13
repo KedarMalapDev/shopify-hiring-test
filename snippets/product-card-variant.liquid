@@ -616,6 +616,7 @@
           <div class="size-options">
             <ul class="size-options-list">
               {% for value in size_option.values %}
+                {% comment %} @todo @KedarMalapDev always give full variant names ex v -> variant, product_card_product -> product_variant_card use chatgpt for naming {% endcomment %}
                 {% for v in product_card_product.variants %}
                   {% if v[product_option_key] == variant[product_option_key] and v.options contains value %}
                     <li>
