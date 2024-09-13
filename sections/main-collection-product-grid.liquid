@@ -166,6 +166,7 @@
                   {% assign unique_colors_count = 0 %}
 
                   {% for product_option in product.options_with_values %}
+                    {% comment %} @todo @KedarMalapDev this will not work when you translate the page :) {% endcomment %}
                     {% if product_option.name == 'Color' %}
                       {% assign product_option_color = true %}
                       {% assign product_option_key = 'option' | append: forloop.index %}
